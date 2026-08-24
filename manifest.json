@@ -1,0 +1,8 @@
+{
+  "name": "Local Image Viewer V2",
+  "short_name": "Viewer V2",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0f0f10",
+  "theme_color": "#111111"
+}

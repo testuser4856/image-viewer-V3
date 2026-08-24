@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111111" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Local Viewer V2</title>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">View V2</div>
+
+  <select id="selSort" class="select">
+    <option value="updatedDesc">更新（新→古）</option>
+    <option value="titleAsc">タイトル（A→Z）</option>
+  </select>
+
+  <button id="btnBackup" class="btn">バックアップ</button>
+  <button id="btnRestore" class="btn">復元</button>
+  <input id="restorePicker" type="file" accept="application/json" hidden />
+
+  <button id="btnImport" class="btn">CBZ追加</button>
+  <input id="archivePicker" type="file" accept=".cbz,.zip,application/zip,application/x-zip-compressed" hidden />
+</header>
+
+<main id="libraryView" class="view">
+  <div class="sectionTitle">本棚</div>
+  <div id="libraryGrid" class="grid"></div>
+</main>
+
+<main id="readerView" class="view hidden">
+  <div id="readerStage" class="stage">
+    <img id="readerImg" alt="" />
+  </div>
+
+  <div id="readerHud" class="hud hidden">
+    <button id="btnBack" class="btn">← 本棚</button>
+    <button id="btnBookmarkAdd" class="btn">しおり＋</button>
+    <button id="btnBookmarks" class="btn">しおり</button>
+
+    <div class="hudCenter">
+      <input id="rangePage" type="range" min="1" max="1" value="1" />
+      <div id="pageInfo"></div>
+
+      <select id="selFit" class="select">
+        <option value="fitWidth">幅に合わせる</option>
+        <option value="fitHeight">高さに合わせる</option>
+        <option value="contain">全体表示</option>
+      </select>
+
+      <select id="selViewMode" class="select">
+        <option value="normal">通常</option>
+        <option value="full">最大化</option>
+        <option value="split-left">左半分</option>
+        <option value="split-right">右半分</option>
+      </select>
+
+      <label class="mini">余白</label>
+      <input id="rangeMargin" type="range" min="0" max="24" value="8" />
+    </div>
+  </div>
+</main>
+
+<div id="bmModal" class="modal hidden">
+  <div class="modalCard">
+    <div class="modalHeader">
+      <strong>しおり</strong>
+      <button id="btnBmClose" class="btn">閉じる</button>
+    </div>
+    <div id="bmList"></div>
+  </div>
+</div>
+
+<div id="busyOverlay" class="busy hidden">
+  <div id="busyText" class="busyCard">処理中...</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@zip.js/zip.js@2.8.34/dist/zip.min.js" crossorigin="anonymous"></script>
+<script src="app.js"></script>
+</body>
+</html>

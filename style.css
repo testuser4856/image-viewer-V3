@@ -1,0 +1,167 @@
+:root{
+  --bg:#0f0f10;
+  --fg:#f3f3f3;
+  --card:#1a1a1c;
+  --muted:#aaa;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font-family:system-ui;
+}
+
+.stage{ z-index:0; }
+.topbar{ z-index:10; }
+.hud{ z-index:20; }
+.modal{ z-index:10000; }
+.busy{ z-index:20000; }
+
+.topbar{
+  position:sticky;
+  top:0;
+  padding:calc(10px + var(--safe-top)) 12px 10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:#111;
+  flex-wrap:wrap;
+}
+
+.brand{font-weight:700;margin-right:auto}
+.btn{
+  background:#333;
+  color:#fff;
+  border:0;
+  border-radius:12px;
+  padding:8px 12px;
+}
+
+.view{padding:12px 12px calc(16px + var(--safe-bottom))}
+.sectionTitle{font-weight:700;margin:4px 0 10px}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+.card{
+  background:var(--card);
+  border-radius:12px;
+  padding:10px;
+}
+
+.stage{
+  position:fixed;
+  inset:0;
+  background:#000;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+#readerImg{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  -webkit-user-select:none;
+  user-select:none;
+}
+
+.hud{
+  position:fixed;
+  top:calc(8px + var(--safe-top));
+  left:8px;
+  right:8px;
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  overflow-x:auto;
+}
+
+.hudCenter{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding-top:60px;
+}
+
+.modalCard{
+  background:#222;
+  padding:12px;
+  border-radius:12px;
+  width:90%;
+  max-width:500px;
+  position:relative;
+  pointer-events:auto;
+  max-height:80vh;
+  overflow:auto;
+}
+
+.modalHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+body.modal-open .stage,
+body.modal-open .topbar,
+body.modal-open .hud{
+  pointer-events:none;
+}
+
+body.modal-open .modal,
+body.modal-open .modal *{
+  pointer-events:auto;
+}
+
+.select{
+  background:#222;
+  color:#fff;
+  border:1px solid #555;
+  border-radius:8px;
+  padding:6px 8px;
+  font-size:14px;
+}
+.cardTitle{ font-weight:800; margin-bottom:6px; word-break:break-word; }
+.cardMeta{ color:var(--muted); font-size:12px; display:flex; gap:10px; flex-wrap:wrap; }
+.cardActions{ margin-top:10px; display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; }
+
+.busy{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.busyCard{
+  background:#222;
+  border-radius:12px;
+  padding:14px 18px;
+  max-width:90%;
+  text-align:center;
+}
+
+.hidden{ display:none !important; }
+
+@media (max-width:600px){
+  .topbar{ gap:6px; }
+  .btn{ padding:8px 10px; }
+}
