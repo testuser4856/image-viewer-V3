@@ -1,6 +1,6 @@
-# image-viewer-V2
+# image-viewer-V3
 
-V1の見た目を維持しつつ、画像本体をIndexedDBに保存せずCBZ/ZIPを直接読むV2です。
+V2の見た目と機能を維持しつつ、様々な機能を追加します。
 
 ## 主な変更
 
