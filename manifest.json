@@ -1,6 +1,6 @@
 {
-  "name": "Local Image Viewer V2",
-  "short_name": "Viewer V2",
+  "name": "Local Image Viewer V3",
+  "short_name": "Viewer V3",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0f0f10",
