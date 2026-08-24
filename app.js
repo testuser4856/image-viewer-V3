@@ -1,6 +1,6 @@
 const $ = (s) => document.querySelector(s);
 
-const DB_NAME = "viewerDBV2";
+const DB_NAME = "viewerDBV3";
 const DB_VER = 1;
 const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif)$/i;
 const CACHE_RADIUS = 2;
@@ -587,7 +587,7 @@ async function backupToJsonDownload() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `image-viewer-v2-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `image-viewer-v3-backup-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
