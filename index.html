@@ -148,7 +148,7 @@
     }
 
     if (current.fit === "fitHeight") {
-      stage.style.padding = "0px";
+      stage.style.padding = "env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0";
       stage.style.overflowX = "auto";
       stage.style.overflowY = "hidden";
       stage.style.justifyContent = "flex-start";
