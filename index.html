@@ -8,12 +8,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="style.css" />
-  <title>Local Viewer V3</title>
+  <title>Local Viewer V3.1</title>
 </head>
 <body>
 
 <header class="topbar">
-  <div class="brand">View V3</div>
+  <div class="brand">View V3.1</div>
 
   <select id="selSort" class="select">
     <option value="updatedDesc">更新（新→古）</option>
@@ -82,94 +82,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@zip.js/zip.js@2.8.34/dist/zip.min.js" crossorigin="anonymous"></script>
 <script src="app.js"></script>
-
-<script>
-  function centerHeightFit() {
-    if (current.fit !== "fitHeight" || current.viewMode !== "normal") return;
-    const stage = $("#readerStage");
-    if (!stage) return;
-
-    requestAnimationFrame(() => {
-      stage.scrollLeft = Math.max(0, (stage.scrollWidth - stage.clientWidth) / 2);
-    });
-  }
-
-  function applyFit() {
-    const img = $("#readerImg");
-    const stage = $("#readerStage");
-    if (!img || !stage) return;
-
-    const margin = `${Number(current.margin) || 0}px`;
-
-    img.style.maxWidth = "100%";
-    img.style.maxHeight = "100%";
-    img.style.width = "auto";
-    img.style.height = "auto";
-    img.style.objectFit = "contain";
-    img.style.objectPosition = "center center";
-
-    stage.style.padding = margin;
-    stage.style.overflowX = "hidden";
-    stage.style.overflowY = "hidden";
-    stage.style.justifyContent = "center";
-    stage.style.alignItems = "center";
-    stage.style.webkitOverflowScrolling = "auto";
-
-    if (current.viewMode === "full") {
-      img.style.width = "100%";
-      img.style.height = "100%";
-      img.style.objectFit = "contain";
-      stage.style.padding = "0px";
-      return;
-    }
-
-    if (current.viewMode === "split-left") {
-      img.style.width = "200%";
-      img.style.height = "100%";
-      img.style.objectFit = "cover";
-      img.style.objectPosition = "left center";
-      stage.style.padding = "0px";
-      return;
-    }
-
-    if (current.viewMode === "split-right") {
-      img.style.width = "200%";
-      img.style.height = "100%";
-      img.style.objectFit = "cover";
-      img.style.objectPosition = "right center";
-      stage.style.padding = "0px";
-      return;
-    }
-
-    if (current.fit === "fitWidth") {
-      img.style.width = "100%";
-      img.style.height = "auto";
-      return;
-    }
-
-    if (current.fit === "fitHeight") {
-      stage.style.padding = "env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0";
-      stage.style.overflowX = "auto";
-      stage.style.overflowY = "hidden";
-      stage.style.justifyContent = "flex-start";
-      stage.style.alignItems = "center";
-      stage.style.webkitOverflowScrolling = "touch";
-
-      img.style.maxWidth = "none";
-      img.style.maxHeight = "none";
-      img.style.width = "auto";
-      img.style.height = "100%";
-      img.style.objectFit = "contain";
-
-      centerHeightFit();
-      return;
-    }
-
-    img.style.width = "auto";
-    img.style.height = "auto";
-  }
-
-  $("#readerImg")?.addEventListener("load", centerHeightFit);
-</script>
+<script src="v3-fixes.js"></script>
 </body>
 </html>
