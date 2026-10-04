@@ -21,8 +21,8 @@ let current = {
   index: 0,
   fit: "fitWidth",
   margin: 8,
-  viewMode: "normal",
-  splitSide: "left",
+  viewMode: "split-right",
+  splitSide: "right",
   splitScale: 90,
 };
 
@@ -541,14 +541,14 @@ async function openWithSession(book, entries) {
   current.book = book;
   current.entries = entries;
   current.index = Math.min(Math.max(book.lastIndex ?? 0, 0), entries.length - 1);
-  current.viewMode = "normal";
-  current.splitSide = "left";
+  current.viewMode = "split-right";
+  current.splitSide = "right";
   current.splitScale = Number($("#rangeSplitScale")?.value ?? 90);
   current.fit = $("#selFit")?.value || "fitWidth";
   current.margin = Number($("#rangeMargin")?.value ?? 8);
 
   const selViewMode = $("#selViewMode");
-  if (selViewMode) selViewMode.value = "normal";
+  if (selViewMode) selViewMode.value = "split-right";
 
   clearPageCache();
   showReader();
@@ -742,32 +742,18 @@ function wireEvents() {
 
   $("#selViewMode")?.addEventListener("change", (e) => {
     current.viewMode = e.target.value;
-  
+    if (isSplitMode()) current.splitSide = firstSplitSide();
     applyFit();
-  
-    // 分割モードに切り替えた直後にも現在の縮尺を再適用
-    if (
-      current.viewMode === "split-left" ||
-      current.viewMode === "split-right"
-    ) {
-      const img = $("#readerImg");
-      const scale = Number($("#rangeSplitScale")?.value ?? 90);
-  
-      if (img) {
-        img.style.transform = `scale(${scale / 100})`;
-      }
-    }
   });
 
   $("#rangeSplitScale")?.addEventListener("input", (e) => {
     const v = Number(e.target.value);
-  
-    $("#splitScaleValue").textContent = `${v}%`;
-  
-    const img = $("#readerImg");
-    if (!img) return;
-  
-    img.style.transform = `scale(${v / 100})`;
+    current.splitScale = v;
+
+    const value = $("#splitScaleValue");
+    if (value) value.textContent = `${v}%`;
+
+    if (isSplitMode()) applyFit();
   });
 
   $("#btnBackup")?.addEventListener("click", backupToJsonDownload);
