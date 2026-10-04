@@ -549,6 +549,16 @@ async function openWithSession(book, entries) {
   current.fit = $("#selFit")?.value || "fitWidth";
   current.margin = Number($("#rangeMargin")?.value ?? 8);
 
+  const rangeSplitScale = $("#rangeSplitScale");
+  if (rangeSplitScale) {
+    rangeSplitScale.value = String(DEFAULT_SPLIT_SCALE);
+  }
+  
+  const splitScaleValue = $("#splitScaleValue");
+  if (splitScaleValue) {
+    splitScaleValue.textContent = `${DEFAULT_SPLIT_SCALE}%`;
+  }
+  
   const selViewMode = $("#selViewMode");
   if (selViewMode) selViewMode.value = "split-right";
 
