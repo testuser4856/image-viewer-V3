@@ -21,9 +21,9 @@ let current = {
   index: 0,
   fit: "fitWidth",
   margin: 8,
-  viewMode: "normal",
-  splitSide: "left",
-  splitScale: 90,
+  viewMode: "split-right",
+  splitSide: "right",
+  splitScale: 80,
 };
 
 function openDB() {
@@ -141,6 +141,15 @@ function toggleHud() {
   else hud.classList.add("hidden");
 }
 
+function centerHeightFit() {
+  if (current.fit !== "fitHeight" || current.viewMode !== "normal") return;
+  const stage = $("#readerStage");
+  if (!stage) return;
+  requestAnimationFrame(() => {
+    stage.scrollLeft = Math.max(0, (stage.scrollWidth - stage.clientWidth) / 2);
+  });
+}
+
 function applyFit() {
   const img = $("#readerImg");
   const stage = $("#readerStage");
@@ -148,22 +157,28 @@ function applyFit() {
 
   const margin = `${Number(current.margin) || 0}px`;
 
-  // いったん通常表示用にリセット
   img.style.maxWidth = "100%";
   img.style.maxHeight = "100%";
   img.style.width = "auto";
   img.style.height = "auto";
   img.style.objectFit = "contain";
   img.style.objectPosition = "center center";
-  img.style.transform = "none";
-  img.style.transformOrigin = "center center";
-  img.style.position = "static";
-  img.style.left = "auto";
-  img.style.right = "auto";
-  img.style.top = "auto";
+  img.style.flex = "0 0 auto";
+  img.style.position = "";
+  img.style.top = "";
+  img.style.bottom = "";
+  img.style.left = "";
+  img.style.right = "";
+  img.style.transform = "";
+  img.style.transformOrigin = "";
 
   stage.style.position = "relative";
-  stage.style.overflow = "hidden";
+  stage.style.padding = margin;
+  stage.style.overflowX = "hidden";
+  stage.style.overflowY = "hidden";
+  stage.style.justifyContent = "center";
+  stage.style.alignItems = "center";
+  stage.style.webkitOverflowScrolling = "auto";
 
   if (current.viewMode === "full") {
     img.style.width = "100%";
@@ -173,44 +188,63 @@ function applyFit() {
     return;
   }
 
-  if (current.viewMode === "split-left" || current.viewMode === "split-right") {
-    const scale = Math.min(100, Math.max(60, Number(current.splitScale) || 90));
+  if (isSplitMode()) {
+    const scale = Math.min(100, Math.max(60, Number(current.splitScale) || 80));
+    const side = current.splitSide || firstSplitSide();
+    const stageHeight = stage.clientHeight || window.innerHeight;
+    const imageHeight = Math.floor(stageHeight * scale / 100);
 
-    // 画像は縦100%を基準にして、横にはみ出した部分をstageで隠す。
-    // scaleはtransformで掛けるので、スライダー操作が確実に見た目へ反映される。
+    img.style.maxWidth = "none";
+    img.style.maxHeight = "none";
+    img.style.width = "auto";
+    img.style.height = `${imageHeight}px`;
+    img.style.objectFit = "contain";
     img.style.position = "absolute";
     img.style.top = "50%";
-    img.style.width = "auto";
-    img.style.height = "100%";
-    img.style.maxWidth = "none";
-    img.style.maxHeight = "100%";
-    img.style.objectFit = "contain";
+    img.style.transform = "translateY(-50%)";
 
-    if (current.splitSide === "left") {
+    if (side === "left") {
       img.style.left = "0";
       img.style.right = "auto";
-      img.style.transformOrigin = "left center";
-      img.style.transform = `translateY(-50%) scale(${scale / 100})`;
+      img.style.objectPosition = "left center";
     } else {
       img.style.left = "auto";
       img.style.right = "0";
-      img.style.transformOrigin = "right center";
-      img.style.transform = `translateY(-50%) scale(${scale / 100})`;
+      img.style.objectPosition = "right center";
     }
 
     stage.style.padding = "0px";
+    stage.style.overflowX = "hidden";
+    stage.style.overflowY = "hidden";
     return;
   }
 
   if (current.fit === "fitWidth") {
     img.style.width = "100%";
     img.style.height = "auto";
-  } else if (current.fit === "fitHeight") {
-    img.style.width = "auto";
-    img.style.height = "100%";
+    return;
   }
 
-  stage.style.padding = margin;
+  if (current.fit === "fitHeight") {
+    const safeTop = "env(safe-area-inset-top)";
+    const safeBottom = "env(safe-area-inset-bottom)";
+    stage.style.padding = `${safeTop} 0 ${safeBottom} 0`;
+    stage.style.overflowX = "auto";
+    stage.style.overflowY = "hidden";
+    stage.style.justifyContent = "flex-start";
+    stage.style.alignItems = "center";
+    stage.style.webkitOverflowScrolling = "touch";
+    img.style.maxWidth = "none";
+    img.style.maxHeight = "none";
+    img.style.width = "auto";
+    img.style.height = `calc(100dvh - ${safeTop} - ${safeBottom})`;
+    img.style.objectFit = "contain";
+    centerHeightFit();
+    return;
+  }
+
+  img.style.width = "auto";
+  img.style.height = "auto";
 }
 
 function naturalCompare(a, b) {
@@ -451,6 +485,7 @@ async function deleteBookAll(bookId) {
 function requestArchive(mode, bookId = null) {
   pendingPicker = { mode, bookId };
   const picker = $("#archivePicker");
+  if (!picker) return;
   picker.value = "";
   picker.click();
 }
@@ -524,11 +559,11 @@ async function attachArchiveToBook(bookId, file) {
 }
 
 async function openRegisteredBook(bookId) {
-  const book = await get("books", bookId);
-  if (!book) return;
-
   const session = sessionBooks.get(bookId);
+
   if (session) {
+    const book = await get("books", bookId);
+    if (!book) return;
     await openWithSession(book, session.entries);
     return;
   }
@@ -541,14 +576,21 @@ async function openWithSession(book, entries) {
   current.book = book;
   current.entries = entries;
   current.index = Math.min(Math.max(book.lastIndex ?? 0, 0), entries.length - 1);
-  current.viewMode = "normal";
-  current.splitSide = "left";
-  current.splitScale = Number($("#rangeSplitScale")?.value ?? 90);
+
+  current.viewMode = "split-right";
+  current.splitSide = "right";
+  current.splitScale = Number($("#rangeSplitScale")?.value ?? 80);
   current.fit = $("#selFit")?.value || "fitWidth";
   current.margin = Number($("#rangeMargin")?.value ?? 8);
 
   const selViewMode = $("#selViewMode");
-  if (selViewMode) selViewMode.value = "normal";
+  if (selViewMode) selViewMode.value = "split-right";
+
+  const scaleRange = $("#rangeSplitScale");
+  if (scaleRange) scaleRange.value = String(current.splitScale);
+
+  const scaleValue = $("#splitScaleValue");
+  if (scaleValue) scaleValue.textContent = `${current.splitScale}%`;
 
   clearPageCache();
   showReader();
@@ -739,35 +781,17 @@ function wireEvents() {
     current.margin = Number(e.target.value);
     applyFit();
   });
-
   $("#selViewMode")?.addEventListener("change", (e) => {
     current.viewMode = e.target.value;
-  
+    if (isSplitMode()) current.splitSide = firstSplitSide();
     applyFit();
-  
-    // 分割モードに切り替えた直後にも現在の縮尺を再適用
-    if (
-      current.viewMode === "split-left" ||
-      current.viewMode === "split-right"
-    ) {
-      const img = $("#readerImg");
-      const scale = Number($("#rangeSplitScale")?.value ?? 90);
-  
-      if (img) {
-        img.style.transform = `scale(${scale / 100})`;
-      }
-    }
   });
-
   $("#rangeSplitScale")?.addEventListener("input", (e) => {
     const v = Number(e.target.value);
-  
-    $("#splitScaleValue").textContent = `${v}%`;
-  
-    const img = $("#readerImg");
-    if (!img) return;
-  
-    img.style.transform = `scale(${v / 100})`;
+    current.splitScale = v;
+    const value = $("#splitScaleValue");
+    if (value) value.textContent = `${v}%`;
+    if (isSplitMode()) applyFit();
   });
 
   $("#btnBackup")?.addEventListener("click", backupToJsonDownload);
@@ -793,6 +817,15 @@ function wireEvents() {
     if (e.key === "ArrowLeft") prevPage();
   });
 }
+
+$("#readerImg")?.addEventListener("load", () => {
+  if (isSplitMode()) applyFit();
+  else centerHeightFit();
+});
+
+window.addEventListener("resize", () => {
+  if (current.fit === "fitHeight" || isSplitMode()) applyFit();
+});
 
 (async () => {
   try {
