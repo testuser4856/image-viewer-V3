@@ -104,7 +104,7 @@ function applyFit() {
       100,
       Math.max(
         60,
-        Number(current.splitScale) || 90
+        Number(current.splitScale) || DEFAULT_SPLIT_SCALE
       )
     );
 
