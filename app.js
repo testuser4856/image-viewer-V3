@@ -747,10 +747,14 @@ function wireEvents() {
   });
 
   $("#rangeSplitScale")?.addEventListener("input", (e) => {
-    current.splitScale = Number(e.target.value);
-    const value = $("#splitScaleValue");
-    if (value) value.textContent = `${current.splitScale}%`;
-    applyFit();
+    const v = Number(e.target.value);
+  
+    $("#splitScaleValue").textContent = `${v}%`;
+  
+    const img = $("#readerImg");
+    if (!img) return;
+  
+    img.style.transform = `scale(${v / 100})`;
   });
 
   $("#btnBackup")?.addEventListener("click", backupToJsonDownload);
