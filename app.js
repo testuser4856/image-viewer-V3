@@ -24,7 +24,7 @@ let current = {
   margin: 8,
   viewMode: "split-right",
   splitSide: "right",
-  splitScale: 90,
+  splitScale: DEFAULT_SPLIT_SCALE,
 };
 
 function openDB() {
@@ -545,7 +545,7 @@ async function openWithSession(book, entries) {
 
   current.viewMode = "split-right";
   current.splitSide = "right";
-  current.splitScale = Number($("#rangeSplitScale")?.value ?? 90);
+  current.splitScale = DEFAULT_SPLIT_SCALE;
   current.fit = $("#selFit")?.value || "fitWidth";
   current.margin = Number($("#rangeMargin")?.value ?? 8);
 
