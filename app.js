@@ -742,8 +742,21 @@ function wireEvents() {
 
   $("#selViewMode")?.addEventListener("change", (e) => {
     current.viewMode = e.target.value;
-    if (isSplitMode()) current.splitSide = firstSplitSide();
+  
     applyFit();
+  
+    // 分割モードに切り替えた直後にも現在の縮尺を再適用
+    if (
+      current.viewMode === "split-left" ||
+      current.viewMode === "split-right"
+    ) {
+      const img = $("#readerImg");
+      const scale = Number($("#rangeSplitScale")?.value ?? 90);
+  
+      if (img) {
+        img.style.transform = `scale(${scale / 100})`;
+      }
+    }
   });
 
   $("#rangeSplitScale")?.addEventListener("input", (e) => {
