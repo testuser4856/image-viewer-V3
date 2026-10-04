@@ -1,4 +1,3 @@
-document.title = "Image Viewer V4 SPLIT";
 const $ = (s) => document.querySelector(s);
 
 const DB_NAME = "viewerDBV4";
@@ -149,12 +148,21 @@ function applyFit() {
 
   const margin = `${Number(current.margin) || 0}px`;
 
+  // いったん通常表示用にリセット
   img.style.maxWidth = "100%";
   img.style.maxHeight = "100%";
   img.style.width = "auto";
   img.style.height = "auto";
   img.style.objectFit = "contain";
   img.style.objectPosition = "center center";
+  img.style.transform = "none";
+  img.style.transformOrigin = "center center";
+  img.style.position = "static";
+  img.style.left = "auto";
+  img.style.right = "auto";
+  img.style.top = "auto";
+
+  stage.style.position = "relative";
   stage.style.overflow = "hidden";
 
   if (current.viewMode === "full") {
@@ -167,12 +175,29 @@ function applyFit() {
 
   if (current.viewMode === "split-left" || current.viewMode === "split-right") {
     const scale = Math.min(100, Math.max(60, Number(current.splitScale) || 90));
+
+    // 画像は縦100%を基準にして、横にはみ出した部分をstageで隠す。
+    // scaleはtransformで掛けるので、スライダー操作が確実に見た目へ反映される。
+    img.style.position = "absolute";
+    img.style.top = "50%";
     img.style.width = "auto";
-    img.style.height = `${scale}%`;
+    img.style.height = "100%";
     img.style.maxWidth = "none";
-    img.style.maxHeight = `${scale}%`;
+    img.style.maxHeight = "100%";
     img.style.objectFit = "contain";
-    img.style.objectPosition = `${current.splitSide} center`;
+
+    if (current.splitSide === "left") {
+      img.style.left = "0";
+      img.style.right = "auto";
+      img.style.transformOrigin = "left center";
+      img.style.transform = `translateY(-50%) scale(${scale / 100})`;
+    } else {
+      img.style.left = "auto";
+      img.style.right = "0";
+      img.style.transformOrigin = "right center";
+      img.style.transform = `translateY(-50%) scale(${scale / 100})`;
+    }
+
     stage.style.padding = "0px";
     return;
   }
@@ -281,7 +306,6 @@ async function renderPage() {
     trimPageCache(index);
     prefetchAround(index);
     saveProgress().catch(() => {});
-    showHudTemporarily();
   } catch (e) {
     console.error(e);
     alert(`ページを開けませんでした。\n${e?.message || e}`);
@@ -297,51 +321,49 @@ function firstSplitSide() {
 }
 
 function secondSplitSide() {
-  return firstSplitSide() === "left" ? "right" : "left";
+  return current.viewMode === "split-right" ? "left" : "right";
 }
 
 function nextPage() {
-  if (!isSplitMode()) {
+  if (isSplitMode()) {
+    if (current.splitSide === firstSplitSide()) {
+      current.splitSide = secondSplitSide();
+      applyFit();
+      return;
+    }
+
     if (current.index < current.entries.length - 1) {
       current.index += 1;
+      current.splitSide = firstSplitSide();
       renderPage();
     }
-    return;
-  }
-
-  if (current.splitSide === firstSplitSide()) {
-    current.splitSide = secondSplitSide();
-    applyFit();
-    showHudTemporarily();
     return;
   }
 
   if (current.index < current.entries.length - 1) {
     current.index += 1;
-    current.splitSide = firstSplitSide();
     renderPage();
   }
 }
 
 function prevPage() {
-  if (!isSplitMode()) {
+  if (isSplitMode()) {
+    if (current.splitSide === secondSplitSide()) {
+      current.splitSide = firstSplitSide();
+      applyFit();
+      return;
+    }
+
     if (current.index > 0) {
       current.index -= 1;
+      current.splitSide = secondSplitSide();
       renderPage();
     }
     return;
   }
 
-  if (current.splitSide === secondSplitSide()) {
-    current.splitSide = firstSplitSide();
-    applyFit();
-    showHudTemporarily();
-    return;
-  }
-
   if (current.index > 0) {
     current.index -= 1;
-    current.splitSide = secondSplitSide();
     renderPage();
   }
 }
@@ -531,6 +553,7 @@ async function openWithSession(book, entries) {
   clearPageCache();
   showReader();
   await renderPage();
+  showHudTemporarily();
 }
 
 function resetReaderSession() {
@@ -630,7 +653,7 @@ async function backupToJsonDownload() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `image-viewer-v3-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `image-viewer-v4-backup-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
@@ -688,10 +711,11 @@ function wireEvents() {
   $("#selSort")?.addEventListener("change", renderLibrary);
 
   $("#readerStage")?.addEventListener("click", (e) => {
-    const w = window.innerWidth;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
 
-    if (e.clientX < w * 0.3) prevPage();
-    else if (e.clientX > w * 0.7) nextPage();
+    if (x < rect.width * 0.3) prevPage();
+    else if (x > rect.width * 0.7) nextPage();
     else toggleHud();
   });
 
@@ -702,6 +726,7 @@ function wireEvents() {
 
   $("#rangePage")?.addEventListener("change", (e) => {
     current.index = Number(e.target.value) - 1;
+    if (isSplitMode()) current.splitSide = firstSplitSide();
     renderPage();
   });
 
@@ -723,8 +748,8 @@ function wireEvents() {
 
   $("#rangeSplitScale")?.addEventListener("input", (e) => {
     current.splitScale = Number(e.target.value);
-    const label = $("#splitScaleValue");
-    if (label) label.textContent = `${current.splitScale}%`;
+    const value = $("#splitScaleValue");
+    if (value) value.textContent = `${current.splitScale}%`;
     applyFit();
   });
 
