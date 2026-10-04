@@ -4,6 +4,7 @@ const DB_NAME = "viewerDBV4";
 const DB_VER = 1;
 const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif)$/i;
 const CACHE_RADIUS = 2;
+const DEFAULT_SPLIT_SCALE = 60;
 
 let db;
 let pendingPicker = { mode: null, bookId: null };
@@ -13,7 +14,6 @@ let lastObjectURL = null;
 
 const sessionBooks = new Map();
 const pageBlobCache = new Map();
-const DEFAULT_SPLIT_SCALE = 60;
 
 let current = {
   bookId: null,
