@@ -546,6 +546,11 @@ async function openWithSession(book, entries) {
   current.viewMode = "split-right";
   current.splitSide = "right";
   current.splitScale = DEFAULT_SPLIT_SCALE;
+
+  alert(
+  `DEFAULT=${DEFAULT_SPLIT_SCALE}\ncurrent=${current.splitScale}`
+  );
+  
   current.fit = $("#selFit")?.value || "fitWidth";
   current.margin = Number($("#rangeMargin")?.value ?? 8);
 
