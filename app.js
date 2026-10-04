@@ -13,6 +13,7 @@ let lastObjectURL = null;
 
 const sessionBooks = new Map();
 const pageBlobCache = new Map();
+const DEFAULT_SPLIT_SCALE = 60;
 
 let current = {
   bookId: null,
