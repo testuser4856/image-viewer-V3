@@ -541,6 +541,7 @@ async function openWithSession(book, entries) {
   current.book = book;
   current.entries = entries;
   current.index = Math.min(Math.max(book.lastIndex ?? 0, 0), entries.length - 1);
+
   current.viewMode = "split-right";
   current.splitSide = "right";
   current.splitScale = Number($("#rangeSplitScale")?.value ?? 90);
