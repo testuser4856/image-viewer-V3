@@ -164,9 +164,10 @@ function applyFit() {
   }
 
   if (current.viewMode === "split-left" || current.viewMode === "split-right") {
-    img.style.width = "200%";
+    img.style.width = "auto";
     img.style.height = "100%";
-    img.style.objectFit = "cover";
+    img.style.maxWidth = "none";
+    img.style.objectFit = "contain";
     img.style.objectPosition = `${current.splitSide} center`;
     stage.style.padding = "0px";
     return;
