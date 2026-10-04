@@ -1,6 +1,6 @@
 const $ = (s) => document.querySelector(s);
 
-const DB_NAME = "viewerDBV3";
+const DB_NAME = "viewerDBV4";
 const DB_VER = 1;
 const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif)$/i;
 const CACHE_RADIUS = 2;
@@ -22,6 +22,7 @@ let current = {
   fit: "fitWidth",
   margin: 8,
   viewMode: "normal",
+  splitSide: "left",
 };
 
 function openDB() {
@@ -162,20 +163,11 @@ function applyFit() {
     return;
   }
 
-  if (current.viewMode === "split-left") {
+  if (current.viewMode === "split-left" || current.viewMode === "split-right") {
     img.style.width = "200%";
     img.style.height = "100%";
     img.style.objectFit = "cover";
-    img.style.objectPosition = "left center";
-    stage.style.padding = "0px";
-    return;
-  }
-
-  if (current.viewMode === "split-right") {
-    img.style.width = "200%";
-    img.style.height = "100%";
-    img.style.objectFit = "cover";
-    img.style.objectPosition = "right center";
+    img.style.objectPosition = `${current.splitSide} center`;
     stage.style.padding = "0px";
     return;
   }
@@ -301,6 +293,63 @@ function nextPage() {
 function prevPage() {
   if (current.index > 0) {
     current.index -= 1;
+    renderPage();
+  }
+}
+
+
+function isSplitMode() {
+  return current.viewMode === "split-left" || current.viewMode === "split-right";
+}
+
+function firstSplitSide() {
+  return current.viewMode === "split-right" ? "right" : "left";
+}
+
+function secondSplitSide() {
+  return current.viewMode === "split-right" ? "left" : "right";
+}
+
+function resetSplitSide() {
+  current.splitSide = firstSplitSide();
+}
+
+function nextView() {
+  if (!isSplitMode()) {
+    nextPage();
+    return;
+  }
+
+  if (current.splitSide === firstSplitSide()) {
+    current.splitSide = secondSplitSide();
+    applyFit();
+    showHudTemporarily();
+    return;
+  }
+
+  if (current.index < current.entries.length - 1) {
+    current.index += 1;
+    resetSplitSide();
+    renderPage();
+  }
+}
+
+function prevView() {
+  if (!isSplitMode()) {
+    prevPage();
+    return;
+  }
+
+  if (current.splitSide === secondSplitSide()) {
+    current.splitSide = firstSplitSide();
+    applyFit();
+    showHudTemporarily();
+    return;
+  }
+
+  if (current.index > 0) {
+    current.index -= 1;
+    current.splitSide = secondSplitSide();
     renderPage();
   }
 }
@@ -479,6 +528,7 @@ async function openWithSession(book, entries) {
   current.entries = entries;
   current.index = Math.min(Math.max(book.lastIndex ?? 0, 0), entries.length - 1);
   current.viewMode = "normal";
+  current.splitSide = "left";
   current.fit = $("#selFit")?.value || "fitWidth";
   current.margin = Number($("#rangeMargin")?.value ?? 8);
 
@@ -647,16 +697,8 @@ function wireEvents() {
   $("#readerStage")?.addEventListener("click", (e) => {
     const w = window.innerWidth;
 
-    if (current.viewMode === "split-left" || current.viewMode === "split-right") {
-      current.viewMode = current.viewMode === "split-left" ? "split-right" : "split-left";
-      const sel = $("#selViewMode");
-      if (sel) sel.value = current.viewMode;
-      applyFit();
-      return;
-    }
-
-    if (e.clientX < w * 0.3) prevPage();
-    else if (e.clientX > w * 0.7) nextPage();
+    if (e.clientX < w * 0.3) prevView();
+    else if (e.clientX > w * 0.7) nextView();
     else toggleHud();
   });
 
@@ -682,6 +724,7 @@ function wireEvents() {
 
   $("#selViewMode")?.addEventListener("change", (e) => {
     current.viewMode = e.target.value;
+    if (isSplitMode()) resetSplitSide();
     applyFit();
   });
 
@@ -704,8 +747,8 @@ function wireEvents() {
   });
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight") nextPage();
-    if (e.key === "ArrowLeft") prevPage();
+    if (e.key === "ArrowRight") nextView();
+    if (e.key === "ArrowLeft") prevView();
   });
 }
 
