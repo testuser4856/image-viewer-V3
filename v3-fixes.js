@@ -107,7 +107,11 @@ function applyFit() {
         Number(current.splitScale) || DEFAULT_SPLIT_SCALE
       )
     );
-
+const debug = $("#splitScaleValue");
+if (debug) {
+  debug.textContent =
+    `D:${DEFAULT_SPLIT_SCALE} C:${current.splitScale} S:${scale}`;
+}
     // 現在表示する側
     // app.js側でsplitSideがある場合はそちらを優先
     const side =
