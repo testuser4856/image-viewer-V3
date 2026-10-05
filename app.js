@@ -4,7 +4,7 @@ const DB_NAME = "viewerDBV4";
 const DB_VER = 1;
 const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif)$/i;
 const CACHE_RADIUS = 2;
-const DEFAULT_SPLIT_SCALE = 80;
+const DEFAULT_SPLIT_SCALE = 70;
 
 let db;
 let pendingPicker = { mode: null, bookId: null };
